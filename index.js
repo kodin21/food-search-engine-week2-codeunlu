@@ -1,1 +1,1 @@
-console.log('test')
+import Fuse from 'fuse.js'
