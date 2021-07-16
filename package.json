@@ -1,9 +1,9 @@
 {
-  "name": "week1-homework",
+  "name": "week2-homework",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/kodin21/week1-homework.git",
-  "author": "Berkay Aydın <sbayd06@gmail.com>",
+  "repository": "https://github.com/kodin21/food-search-engine-week2-codeunlu.git",
+  "author": "Mustafa ÜNLÜ <codeunlu@gmail.com>",
   "license": "MIT",
   "scripts": {
     "start": "parcel index.html"
@@ -12,6 +12,7 @@
     "parcel-bundler": "^1.12.5"
   },
   "dependencies": {
+    "@popperjs/core": "^2.9.2",
     "fuse.js": "^6.4.6"
   }
 }
