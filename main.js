@@ -1,42 +1,9 @@
 class FoodApp{
     constructor(){
-        this.foodsList = []
-        this.foodsFavorite = []
+        this.foodArray = [].map((food) => ({...food,isFavorite})),
+        this.bodyElement = document.querySelector('.foodList'),
         this.render()
     }
-
-    fuseMealSearch(){
-        const options = {
-            includeScore: true,
-            keys: ["fields.strMeal"]
-        }
-        const fuse = new Fuse(this.foodsList,options)
-
-        const searchInput = document.querySelector('#foodInput')
-        searchInput.addEventListener('input', (e) => {
-            setTimeout(() => {
-                const result = fuse.search(e.target.value)
-                this.createCard(result)
-            }, 1000)
-        })
-    }
-
-    createCard(result){
-        const foodCardBody = document.querySelector('.foodList')
-        
-        foodCardBody.innerHTML = ""
-
-        result.forEach((element) => {
-            this.cardDesign(element.item.fields.strMeal,element.item.fields.strMealThumb,"heart-outline")
-        })
-
-        const foodFavoriteButton = document.querySelector('.foodFavoriteButton')
-        foodFavoriteButton.addEventListener('click', () => {
-            foodFavoriteButton.innerHTML = `<ion-icon name="heart-circle-outline"></ion-icon>`
-        }) 
-           
-    }
-
     async render(){
         let loading = document.querySelector(".loading")
         let title = document.querySelector(".display-1")
@@ -57,7 +24,7 @@ class FoodApp{
             .then(response => response.json())
             .then(item => {
                 item.records.forEach(element => {
-                    this.foodsList.push(element)
+                    this.foodArray.push(element)
                 })
             })
 
@@ -69,8 +36,33 @@ class FoodApp{
         this.fuseMealSearch()
     }
 
-    cardDesign(title,thumb){
-        const foodCard = document.querySelector('.foodList')
+    fuseMealSearch(){
+        const options = {
+            includeScore: true,
+            keys: ["fields.strMeal"]
+        }
+        const fuse = new Fuse(this.foodArray,options)
+
+        const searchInput = document.querySelector('#foodInput')
+
+        this.bodyElement.innerHTML = ""
+
+        searchInput.addEventListener('input', (e) => {
+            setTimeout(() => {
+                this.bodyElement.innerHTML = ""
+                const result = fuse.search(e.target.value)
+                result.map((foods) => this.createCard(foods))
+            }, 500)
+        })
+        
+    }
+
+    createCard(foods){
+        const {isFavorite} = foods.item
+        const {idMeal, strMeal, strMealThumb} = foods.item.fields
+        const favoriteArray =  this.foodArray.find((food) => food.fields.idMeal === idMeal)
+
+
         const divBody = document.createElement('div')
         const cardDiv = document.createElement('div')
         const imgLayout = document.createElement('img')
@@ -78,7 +70,7 @@ class FoodApp{
         const cardTitle = document.createElement('h5')
         const cardButton = document.createElement('button')
 
-        foodCard.append(divBody)
+        this.bodyElement.append(divBody)
         divBody.append(cardDiv)
         cardDiv.append(imgLayout,cardBody)
         cardBody.append(cardTitle,cardButton)
@@ -92,13 +84,32 @@ class FoodApp{
         cardButton.classList.add('foodFavoriteButton')
 
         
-        cardTitle.textContent = title
-        imgLayout.src = thumb
-        cardButton.innerHTML = `<ion-icon name="heart-outline"></ion-icon>`
+        cardTitle.textContent = strMeal
+        imgLayout.src = strMealThumb
+
+        if(localStorage.getItem("favori-"+idMeal)){
+            cardButton.innerHTML = `<ion-icon name="heart-circle-outline"></ion-icon>`
+
+        }else{
+            cardButton.innerHTML = `<ion-icon name="heart-outline"></ion-icon>`
+        }
+
+        cardButton.addEventListener('click', () => {
+            if(favoriteArray.isFavorite == true){
+                this.foodArray.find((food) => food.fields.idMeal === idMeal).isFavorite = false
+                localStorage.removeItem("favori-"+idMeal)
+                cardButton.innerHTML = `<ion-icon name="heart-outline"></ion-icon>`
+
+            }else{
+                this.foodArray.find((food) => food.fields.idMeal === idMeal).isFavorite = true
+                localStorage.setItem("favori-"+idMeal,strMeal)
+                cardButton.innerHTML = `<ion-icon name="heart-circle-outline"></ion-icon>`
+            }
+            console.log(favoriteArray.isFavorite)
+        })
+
+        return divBody
+           
     }
-
-
-
 }
-
 new FoodApp()
